@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Decode a message from an image</title>
+    <link rel='stylesheet' type='text/css' media='screen' href='css/main.css'>
+  </head>
+
+  <body>
+    <h1>Decode a secret message</h1>
+
+    <img src='images/encoded.png' id='encodedImage'>
+
+    <p>Choose matching image:</p>
+    <a href='#' class='imageDecode'><img src='images/red.png'></a>
+    <a href='#' class='imageDecode'><img src='images/blue.png'></a>
+    <a href='#' class='imageDecode'><img src='images/striped.png'></a>
+
+    <p>Decoded message:</p>
+    <p id='messagePlaceHolder'></p>
+
+    <div>
+      <a href='encode.html'>Encode a message</a>
+    </div>
+
+    <script type='text/javascript' src='lib/jquery-1.7.1.min.js'></script>
+    <script type='text/javascript' src='lib/sjcl.js'></script>
+    <script type="text/javascript" src="js/steganography.js"></script>
+    <script type='text/javascript' >
+      $(document).ready(function () {
+          myNameSpace.init();
+      });
+    </script>
+  </body>
+</html>

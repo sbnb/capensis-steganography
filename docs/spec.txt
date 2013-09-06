@@ -1,0 +1,24 @@
+Email Steganography
+
+Use Examples
+============
+
+Sending an email
+----------------
+
+Write secret text into field.
+Choose from several images under field.
+Encoded image is loaded into new tab.
+Save as.
+
+Then send email as normal, including encoded image.
+
+Receiving an email
+------------------
+
+Save encoded image from received email.
+
+Open steganography app.
+Encoded image is loaded into program (how?).
+Choose matching un-encoded image.
+Image is decoded and secret message displayed.

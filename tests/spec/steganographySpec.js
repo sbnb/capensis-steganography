@@ -40,16 +40,6 @@ describe('Email Steganography Tests', function() {
             expect(fakeImageData.data).not.toEqual(clonedImageData.data);
         });
 
-        it('inserting message sets magic bits indicating image data altered', function() {
-            myNameSpace.encodeMessageInImageData(message, fakeImageData);
-            var changes = myNameSpace.getChangesBetweenImageData(fakeImageData,
-                    clonedImageData);
-            expect(changes[0]).toBe(1);
-            expect(changes[1]).toBe(1);
-            expect(changes[2]).toBe(1);
-            expect(changes[3]).toBe(1);
-        });
-
         it('can convert a message to an 8 bit binary representation', function() {
             var simple = 'hey',
                 binary8Bit = myNameSpace.messageToEightBitBinary(simple);
@@ -73,19 +63,27 @@ describe('Email Steganography Tests', function() {
             expect(changes.length).toBe(16);
         });
 
-        it('can insert and retrieve a simple string into/from image data', function() {
+        it('can retrieve expected binary array after inserting message', function() {
             var simple = 'hey';
             myNameSpace.encodeMessageInImageData(simple, fakeImageData);
             var changes = myNameSpace.getChangesBetweenImageData(fakeImageData,
                     clonedImageData);
 
-            expect(changes.length).toBe(24 + 4);
-            console.log(changes);
-            expect(changes.slice(0, 4)).toEqual([1,1,1,1]);
-            expect(changes.slice(4, 12)).toEqual([0,1,1,0,1,0,0,0]);
-            expect(changes.slice(12, 20)).toEqual([0,1,1,0,0,1,0,1]);
-            expect(changes.slice(20, 28)).toEqual([0,1,1,1,1,0,0,1]);
+            expect(changes.length).toBe(24);
+            expect(changes.slice(0, 8)).toEqual([0,1,1,0,1,0,0,0]);
+            expect(changes.slice(8, 16)).toEqual([0,1,1,0,0,1,0,1]);
+            expect(changes.slice(16, 24)).toEqual([0,1,1,1,1,0,0,1]);
         });
+
+        it('can retireve a plain message', function() {
+            myNameSpace.encodeMessageInImageData(message, fakeImageData);
+            var changes = myNameSpace.getChangesBetweenImageData(fakeImageData,
+                    clonedImageData);
+            var text = myNameSpace.extractMessageFromImageData(fakeImageData,
+                    clonedImageData);
+            //~ expect(text).toEqual(message);
+        });
+
     });
 
 

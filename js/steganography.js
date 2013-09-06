@@ -102,21 +102,14 @@ var myNameSpace = (function () {
     function encodeMessageInImageData(message, imageData) {
         var eightBitBinary = messageToEightBitBinary(message),
             flattened = [].concat.apply([], eightBitBinary),
-            len = eightBitBinary.length * 8 + 4;
+            len = eightBitBinary.length * 8;
 
         console.log('encodeMessageInImageData: len: ' + len);
-
-        for (var idx = 4; idx < len; idx += 1) {
-            imageData.data[idx] += flattened[idx - 4] + 1;
+        for (var idx = 0; idx < len; idx += 1) {
+            imageData.data[idx] += flattened[idx] + 1;
         }
-        markDataAsAltered(imageData);
     }
 
-    // increment first 4 values of imageData.data by 1 to signify altered image
-    function markDataAsAltered(imageData) {
-        for (var idx = 0; idx < 4; idx += 1) {
-            imageData.data[idx] += 2;
-        }
     }
 
     // return changes between image data as pseudo bit array

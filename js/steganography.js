@@ -163,6 +163,12 @@ var myNameSpace = (function () {
         return binaryArray;
     }
 
+    function assert(condition, message) {
+        if (!condition) {
+            throw new Error("ASSERTION FAIL: " + message);
+        }
+    }
+
     return {
         init: init,
         encodeMessageInImageData: encodeMessageInImageData,

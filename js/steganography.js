@@ -104,12 +104,14 @@ var myNameSpace = (function () {
             flattened = [].concat.apply([], eightBitBinary),
             len = eightBitBinary.length * 8;
 
-        console.log('encodeMessageInImageData: len: ' + len);
         for (var idx = 0; idx < len; idx += 1) {
             imageData.data[idx] += flattened[idx] + 1;
         }
     }
 
+    function extractMessageFromImageData(changed, original) {
+        var changes = getChangesBetweenImageData(changed, original);
+        return eightBitBinaryToText(changes);
     }
 
     // return changes between image data as pseudo bit array
@@ -133,6 +135,24 @@ var myNameSpace = (function () {
             binaryArray.push(almostBinaryArray[idx] - 1);
         }
         return binaryArray;
+    }
+
+    // parse 8 bit binary aray (aligned to word boundary) to text
+    function eightBitBinaryToText(binaryArray) {
+        var message = '';
+        for (var idx = 0; idx < binaryArray.length; idx += 8) {
+            //~ binaryArray[idx]
+            message += binaryArrayToChar(binaryArray.slice(idx, idx + 8));
+        }
+        return message;
+    }
+
+    // parse 8 bit binary array into a character
+    function binaryArrayToChar(eightBitBinaryArray) {
+        assert(eightBitBinaryArray.length === 8, 'binaryArrayToChar: expect 8 bit ' +
+                'binary, got ' + eightBitBinaryArray.length);
+        var decimal = parseInt(eightBitBinaryArray.join(''), 2);
+        return String.fromCharCode(decimal);
     }
 
     // turn string into binary representation of each char code
@@ -172,6 +192,7 @@ var myNameSpace = (function () {
     return {
         init: init,
         encodeMessageInImageData: encodeMessageInImageData,
+        extractMessageFromImageData: extractMessageFromImageData,
         getChangesBetweenImageData: getChangesBetweenImageData,
         messageToEightBitBinary: messageToEightBitBinary
     };

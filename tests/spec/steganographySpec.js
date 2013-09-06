@@ -75,13 +75,13 @@ describe('Email Steganography Tests', function() {
             expect(changes.slice(16, 24)).toEqual([0,1,1,1,1,0,0,1]);
         });
 
-        it('can retireve a plain message', function() {
+        it('can retrieve a plain message', function() {
             myNameSpace.encodeMessageInImageData(message, fakeImageData);
             var changes = myNameSpace.getChangesBetweenImageData(fakeImageData,
                     clonedImageData);
             var text = myNameSpace.extractMessageFromImageData(fakeImageData,
                     clonedImageData);
-            //~ expect(text).toEqual(message);
+            expect(text).toEqual(message);
         });
 
     });

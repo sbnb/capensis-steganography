@@ -22,24 +22,69 @@ describe('Email Steganography Tests', function() {
                     clonedImageData);
             expect(changes.length).toBe(0);
         });
+
+        it('image data is completely opaque', function() {
+            var alphaValues = getAlphaChannel(fakeImageData.data);
+            expect(alphaValues).toHaveAllValuesInRange(255, 255);
+        });
+
     });
 
     describe('Inserting messages', function() {
 
         it('alters the image data when inserting a message', function() {
             myNameSpace.encodeMessageInImageData(message, fakeImageData);
-            // fakeImageData and clonedImageData should now be different
             expect(fakeImageData.data).not.toEqual(clonedImageData.data);
         });
 
-        it('can convert a message to an 8 bit binary representation', function() {
+        it('alters the image data when inserting minimal message "a"', function() {
+            var imageData = createImageData(2, 1, 254);
+            myNameSpace.encodeMessageInImageData('a', imageData);
+            expect(imageData.data).not.toEqual(clonedImageData.data);
+        });
+
+        it('can convert a message to an array of 8 bit bytes', function() {
             var simple = 'hey',
-                binary8Bit = myNameSpace.messageToEightBitBinary(simple);
-            expect(binary8Bit.length).toBe(3);
-            expect(binary8Bit[0].length).toBe(8);
-            expect(binary8Bit[0]).toEqual([0,1,1,0,1,0,0,0]);
-            expect(binary8Bit[1]).toEqual([0,1,1,0,0,1,0,1]);
-            expect(binary8Bit[2]).toEqual([0,1,1,1,1,0,0,1]);
+                bytes = myNameSpace.stringToBytes(simple);
+            expect(bytes.length).toBe(24);
+            expect(bytes).toEqual([
+                0,1,1,0,1,0,0,0,
+                0,1,1,0,0,1,0,1,
+                0,1,1,1,1,0,0,1]);
+        });
+
+        it('does not change the alpha channel on insertion', function() {
+            myNameSpace.encodeMessageInImageData(message, fakeImageData);
+            var alphaChannel = getAlphaChannel(fakeImageData.data);
+            expect(alphaChannel).toHaveAllValuesInRange(255, 255);
+        });
+
+
+        it('handles rgba values of 0 edge case', function() {
+            var imageData = createImageData(3, 1, 0);
+            myNameSpace.encodeMessageInImageData('a', imageData);
+            expect(imageData.data).toEqual([
+                0, 1, 1, 255,
+                0, 0, 0, 255,
+                0, 1, 0, 255]);
+        });
+
+        it('handles rgba values of 254 edge case', function() {
+            var imageData = createImageData(3, 1, 254);
+            myNameSpace.encodeMessageInImageData('a', imageData);
+            expect(imageData.data).toEqual([
+                254, 255, 255, 255,
+                254, 254, 254, 255,
+                254, 255, 254, 255]);
+        });
+
+        it('handles rgba values of 255 edge case', function() {
+            var imageData = createImageData(3, 1, 255);
+            myNameSpace.encodeMessageInImageData('a', imageData);
+            expect(imageData.data).toEqual([
+                255, 254, 254, 255,
+                255, 255, 255, 255,
+                255, 254, 255, 255]);
         });
 
     });
@@ -47,12 +92,13 @@ describe('Email Steganography Tests', function() {
     describe('Extracting messages', function() {
 
         it('can extract changes in image data after alteration', function() {
-            for (var idx = 0; idx < 16; idx += 1) {
-                fakeImageData.data[idx] += 1;
-            }
+            myNameSpace.storeByte(fakeImageData, 0, [1,1,1,1,1,1,1,1]);
+            myNameSpace.storeByte(fakeImageData, 12, [1,1,1,1,1,1,1,1]);
+
             var changes = myNameSpace.getChangesBetweenImageData(fakeImageData,
                     clonedImageData);
             expect(changes.length).toBe(16);
+            expect(changes).toHaveAllValuesInRange(1, 1);
         });
 
         it('can retrieve expected binary array after inserting message', function() {

@@ -27,9 +27,10 @@ var myNameSpace = (function () {
             red: 'images/red.png',
             blue: 'images/blue.png',
             striped: 'images/striped.png',
-            stripedCopy: 'images/striped-copy.png'
+            encoded: 'images/encoded.png'
         },
-        buffer = document.createElement('canvas');
+        buffer = document.createElement('canvas'),
+        significantBits = [0, 1, 2, 4, 5, 6, 8, 9];
 
     buffer.width = WIDTH;
     buffer.height = HEIGHT;
@@ -40,9 +41,19 @@ var myNameSpace = (function () {
         loadImages(imagePaths, addEventHandlers);
     }
 
+    // TODO: image alpha values must always be opaque (255)
+    // check and notify user if image unsuitable
     function addEventHandlers(images) {
         $('.imageDecode').off().on('click', function (e) {
             var originalImgObj = getImageObjFromHtmlImageSrc(images, e.target.src),
+                changedImgObj = images.encoded;
+
+            var changedImageData = getImageDataViaCanvas(changedImgObj, buffer),
+                originalImageData = getImageDataViaCanvas(originalImgObj, buffer),
+                changes = getChangesBetweenImageData(changedImageData, originalImageData),
+                message = extractMessageFromImage(buffer, changedImgObj, originalImgObj);
+
+            $('#messagePlaceHolder').text(message);
         });
 
         $('.imageEncode').off().on('click', function (e) {
@@ -74,15 +85,21 @@ var myNameSpace = (function () {
         }
     }
 
-    function encodeMessageIntoImage(message, image) {
-        var charCodes = [];
-        for (var idx = 0; idx < message.length; idx += 1) {
-            charCodes.push(message.charCodeAt(idx));
-        }
-        //~ messageToEightBitBinary(message);
+    // find message in changed image, in the differences from original
+    function extractMessageFromImage(canvas, changed, original) {
+        var changedImageData = getImageDataViaCanvas(changed, canvas),
+            originalImageData = getImageDataViaCanvas(original, canvas);
+        return extractMessageFromImageData(changedImageData, originalImageData);
+    }
 
+    function encodeMessageIntoImage(message, image) {
         var imageData = getImageDataViaCanvas(image, buffer);
         encodeMessageInImageData(message, imageData);
+
+        console.log('encodeMessageIntoImage(): first 20 elmts: ',
+                getFirstNElementsOfClampedArray(imageData.data, 20));
+
+
         bufferCtx.putImageData(imageData, 0, 0);
         copyCanvasToImagePlaceHolder(buffer);
     }
@@ -91,6 +108,7 @@ var myNameSpace = (function () {
     function getImageDataViaCanvas(image, canvas) {
         var ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         ctx.drawImage(image, 0, 0);
         var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         return imageData;
@@ -101,88 +119,134 @@ var myNameSpace = (function () {
         document.getElementById('imagePlaceHolder').src = dataURL;
     }
 
+    // store the message as a difference to image data
     function encodeMessageInImageData(message, imageData) {
-        var eightBitBinary = messageToEightBitBinary(message),
-            flattened = [].concat.apply([], eightBitBinary),
-            len = eightBitBinary.length * 8;
+        var bytes = stringToBytes(message),
+            byteIdx = 0,
+            rgbIdx = 0;
 
-        for (var idx = 0; idx < len; idx += 1) {
-            imageData.data[idx] += flattened[idx] + 1;
+        for (byteIdx = 0; byteIdx < bytes.length; byteIdx += 8) {
+            storeByte(imageData, rgbIdx, bytes.slice(byteIdx, byteIdx + 8));
+            rgbIdx += 12;
         }
     }
+
+    // TODO: organise code by grouping related functions into nested funcs
+    // or better: module pattern to more levels
+
+    // one 8 bit byte is stored in 3 pixels, which is 12 elements of data
+    // c = changed, x = unchanged, a = alpha (a also unchanged)
+    // c,c,c,a,c,c,c,a,c,c,x,a
+    function storeByte(imageData, threePxBoundary, byte) {
+        for (var idx = 0; idx < significantBits.length; idx += 1) {
+            storeBit(imageData, threePxBoundary + significantBits[idx], byte[idx]);
+        }
+
+        // store bit as difference, add or subtract to keep within 0..255
+        function storeBit(imageData, imageDataIdx, bit) {
+            var negate = imageData.data[imageDataIdx] > 254 ? -1 : 1;
+            imageData.data[imageDataIdx] += bit * negate;
+        }
+    }
+
+
 
     function extractMessageFromImageData(changed, original) {
         var changes = getChangesBetweenImageData(changed, original);
-        return eightBitBinaryToText(changes);
+        return bytesToString(changes);
     }
 
-    // return changes between image data as pseudo bit array
+    // return changes between image data as array of bytes
     function getChangesBetweenImageData(changed, original) {
-        var changes = [],
-            difference;
-        for (var idx = 0; idx < original.data.length; idx += 1) {
-            difference = Math.abs(changed.data[idx] - original.data[idx]);
-            if (difference === 0) {
-                return normaliseBinaryArray(changes);
+        var bytes = [],
+            originalSlice,
+            changedSlice,
+            byte;
+
+        // read three pixels of data at a time (12 elements)
+        for (var idx = 0; idx < original.data.length - 12; idx += 12) {
+            originalSlice = readSliceAt(original.data, idx);
+            changedSlice = readSliceAt(changed.data, idx);
+
+            if (_.isEqual(originalSlice, changedSlice)) {
+                break;  // no difference in data slices, end of data
             }
-            changes.push(difference);
+            byte = sliceDifferenceToByte(originalSlice, changedSlice);
+            bytes = bytes.concat(byte);
         }
-        return normaliseBinaryArray(changes);
+        return bytes;
+
+        // read 8 significant bits starting at boundaryIdx
+        function readSliceAt(rgbData, boundaryIdx) {
+            var bits = [];
+            for (var sigBit = 0; sigBit < significantBits.length; sigBit += 1) {
+                bits.push(rgbData[boundaryIdx + significantBits[sigBit]]);
+            }
+            return bits;
+        }
+
+        // [6,2,4,..], [7,2,3,..] => [1,0,1,..]
+        function sliceDifferenceToByte(sliceA, sliceB) {
+            var diff = [];
+            for (var idx = 0; idx < sliceA.length; idx += 1) {
+                diff.push(Math.abs(sliceA[idx] - sliceB[idx]));
+            }
+            return diff;
+        }
     }
 
-    // convert arrays like [1,1,2,1,2,2,2] to [0,0,1,0,1,1,1]
-    function normaliseBinaryArray(almostBinaryArray) {
-        var binaryArray = [];
-        for (var idx = 0; idx < almostBinaryArray.length; idx += 1) {
-            binaryArray.push(almostBinaryArray[idx] - 1);
-        }
-        return binaryArray;
-    }
-
-    // parse 8 bit binary aray (aligned to word boundary) to text
-    function eightBitBinaryToText(binaryArray) {
+    // parse array of 8 bit bytes to string
+    function bytesToString(bytes) {
         var message = '';
-        for (var idx = 0; idx < binaryArray.length; idx += 8) {
-            //~ binaryArray[idx]
-            message += binaryArrayToChar(binaryArray.slice(idx, idx + 8));
+        for (var idx = 0; idx < bytes.length; idx += 8) {
+            message += byteToChar(bytes.slice(idx, idx + 8));
         }
         return message;
+
+        // parse byte (8 bit array) into a character
+        function byteToChar(byte) {
+            assert(byte.length === 8, 'byteToChar: expect 8 bit byte: ' +
+                    byte.length);
+            var decimal = parseInt(byte.join(''), 2);
+            return String.fromCharCode(decimal);
+        }
     }
 
-    // parse 8 bit binary array into a character
-    function binaryArrayToChar(eightBitBinaryArray) {
-        assert(eightBitBinaryArray.length === 8, 'binaryArrayToChar: expect 8 bit ' +
-                'binary, got ' + eightBitBinaryArray.length);
-        var decimal = parseInt(eightBitBinaryArray.join(''), 2);
-        return String.fromCharCode(decimal);
-    }
 
-    // turn string into binary representation of each char code
-    function messageToEightBitBinary(message) {
+    // turn string into array of 8 bit bytes
+    function stringToBytes(message) {
         var charCode,
-            asEightBit = [];
+            bytes = [];
 
         for (var idx = 0; idx < message.length; idx += 1) {
             charCode = message.charCodeAt(idx);
-            asEightBit.push(decimalToBinaryArray(charCode));
+            bytes = bytes.concat(decimalToByte(charCode))
         }
-        return asEightBit;
+        return bytes;
+
+        // convert decimal (0..255) to (padded) 8 bit byte array
+        // 11 => [0,0,0,0,1,0,1,1]
+        function decimalToByte(num) {
+            assert(0 <= num && num <= 255, 'decimalToByte: bad num ' + num);
+
+            var binaryString = '00000000' + num.toString(2),
+                byte = binaryString.slice(-8).split('');
+
+            for (var idx = 0; idx < byte.length; idx += 1) {
+                byte[idx] = parseInt(byte[idx], 10);
+            }
+            return byte;
+        }
     }
 
-    // decimal to binary array (padded to 8 bits)
-    // 11 => [0,0,0,0,1,0,1,1]
-    // correct for 0 <= num <= 255
-    function decimalToBinaryArray(num) {
-        var binaryString = '00000000' + num.toString(2),
-            binaryArray;
-
-        binaryString = binaryString.slice(-8);
-        binaryArray = binaryString.split('');
-
-        for (var idx = 0; idx < binaryArray.length; idx += 1) {
-            binaryArray[idx] = parseInt(binaryArray[idx], 10);
+    // utility function, Chrome does not provide slice on Uint8ClampedArray
+    function getFirstNElementsOfClampedArray(clamped, n) {
+        var limit = n <= clamped.length ? n : clamped.length,
+            elements = [];
+        for (var idx = 0; idx < limit; idx += 1) {
+            elements.push(clamped[idx]);
         }
-        return binaryArray;
+        return elements;
     }
 
     function assert(condition, message) {
@@ -196,7 +260,8 @@ var myNameSpace = (function () {
         encodeMessageInImageData: encodeMessageInImageData,
         extractMessageFromImageData: extractMessageFromImageData,
         getChangesBetweenImageData: getChangesBetweenImageData,
-        messageToEightBitBinary: messageToEightBitBinary
+        stringToBytes: stringToBytes,
+        storeByte: storeByte
     };
 })();
 

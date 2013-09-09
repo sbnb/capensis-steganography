@@ -14,3 +14,7 @@ beforeEach(function() {
   });
 });
 
+function setIfUndefined(variable, defaultValue) {
+    variable = (typeof variable === "undefined") ? defaultValue : variable;
+    return variable;
+}

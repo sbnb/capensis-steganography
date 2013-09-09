@@ -2,3 +2,7 @@
   border: 3px solid #CCC;
   margin-right: 10px;
 }
+
+#messagePlaceHolder {
+  font-weight: bold;
+}

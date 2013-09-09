@@ -18,3 +18,10 @@ function setIfUndefined(variable, defaultValue) {
     variable = (typeof variable === "undefined") ? defaultValue : variable;
     return variable;
 }
+function getAlphaChannel(rgbaData) {
+    var alphaValues = [];
+    for (var idx = 3; idx < rgbaData.length; idx += 4) {
+        alphaValues.push(rgbaData[idx]);
+    }
+    return alphaValues;
+}

@@ -42,17 +42,19 @@ var myNameSpace = (function () {
 
     function addEventHandlers(images) {
         $('.imageDecode').off().on('click', function (e) {
-            console.log('decode an image');
+            var originalImgObj = getImageObjFromHtmlImageSrc(images, e.target.src),
         });
 
         $('.imageEncode').off().on('click', function (e) {
-            var path = 'images/' + e.target.src.split('/').pop(),
-                key = Object.getKeyByValue(imagePaths, path);
-            console.log('Encode an image: ' + path, key);
-            // TODO: trigger encoding
-            // TODO: get the secret message from page
-            encodeMessageIntoImage($('#message').val(), images[key]);
+            var image = getImageObjFromHtmlImageSrc(images, e.target.src);
+            encodeMessageIntoImage($('#message').val(), image);
         });
+    }
+
+    function getImageObjFromHtmlImageSrc(images, src) {
+        var path = 'images/' + src.split('/').pop(),
+            key = Object.getKeyByValue(imagePaths, path);
+        return images[key];
     }
 
     function loadImages(imagePaths, callback) {

@@ -6,15 +6,7 @@ describe('Email Steganography Tests', function() {
 
     beforeEach(function() {
         myNameSpace.init();
-        fakeImageData = {
-            width: 100,
-            height: 100,
-            data: []
-        };
-        var len = fakeImageData.width * fakeImageData.height * 4;
-        for (var idx = 0; idx < len; idx += 1) {
-            fakeImageData.data[idx] = 150;
-        }
+        fakeImageData = createImageData(100, 100, 150);
         clonedImageData = JSON.parse(JSON.stringify(fakeImageData));
         message = 'this is the secret message';
     });

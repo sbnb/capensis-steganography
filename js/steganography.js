@@ -1,22 +1,3 @@
-Object.size = function (obj) {
-    var size = 0;
-    for (var key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            size += 1;
-        }
-    }
-    return size;
-};
-
-Object.getKeyByValue = function(obj, value) {
-    for(var prop in obj) {
-        if(obj.hasOwnProperty(prop)) {
-            if(obj[prop] === value) {
-                return prop;
-            }
-        }
-    }
-}
 
 //----------------------------------------------------------------------------
 
@@ -256,11 +237,26 @@ capensis.decode.bytesToString = function (bytes) {
 
 //----------------------------------------------------------------------------
 
-// TODO: put these functions in a namespace or get rid of them
+Object.size = function (obj) {
+    var size = 0;
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            size += 1;
+        }
+    }
+    return size;
+};
 
 function assert(condition, message) {
     if (!condition) {
         throw new Error("ASSERTION FAIL: " + message);
+Object.getKeyByValue = function(obj, value) {
+    for(var prop in obj) {
+        if(obj.hasOwnProperty(prop)) {
+            if(obj[prop] === value) {
+                return prop;
+            }
+        }
     }
 }
 

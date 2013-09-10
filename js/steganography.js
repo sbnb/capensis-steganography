@@ -129,6 +129,7 @@ capensis.encode.stringToBytes = function (message) {
     // convert decimal (0..255) to (padded) 8 bit byte array
     // 11 => [0,0,0,0,1,0,1,1]
     function decimalToByte(num) {
+        var assert = capensis.assert;
         assert(0 <= num && num <= 255, 'decimalToByte: bad num ' + num);
 
         var binaryString = '00000000' + num.toString(2),
@@ -228,10 +229,17 @@ capensis.decode.bytesToString = function (bytes) {
 
     // parse byte (8 bit array) into a character
     function byteToChar(byte) {
+        var assert = capensis.assert;
         assert(byte.length === 8, 'byteToChar: expect 8 bit byte: ' +
                 byte.length);
         var decimal = parseInt(byte.join(''), 2);
         return String.fromCharCode(decimal);
+    }
+}
+
+capensis.assert = function (condition, message) {
+    if (!condition) {
+        throw new Error("ASSERTION FAIL: " + message);
     }
 }
 
@@ -247,9 +255,6 @@ Object.size = function (obj) {
     return size;
 };
 
-function assert(condition, message) {
-    if (!condition) {
-        throw new Error("ASSERTION FAIL: " + message);
 Object.getKeyByValue = function(obj, value) {
     for(var prop in obj) {
         if(obj.hasOwnProperty(prop)) {
@@ -259,6 +264,8 @@ Object.getKeyByValue = function(obj, value) {
         }
     }
 }
+
+// TODO: put these functions in a namespace or get rid of them
 
 console.log(capensis);
 

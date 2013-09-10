@@ -263,31 +263,6 @@ Object.getKeyByValue = function(obj, value) {
 
 // dev functions, will not remain
 
-//~ function compareImages(imageA, imageB, canvas) {
-    //~ var imageDataA = extractImageData(imageA);
-    //~ var imageDataB = extractImageData(imageB);
-    //~ isImageDataSame(imageDataA, imageDataB);
-//~ }
-//~
-//~ function isImageDataSame(imageDataA, imageDataB) {
-    //~ // check dimensions match
-    //~ if (imageDataA.width !== imageDataB.width ||
-        //~ imageDataA.height !== imageDataB.height) {
-            //~ console.log('Dimensions do not match for images.');
-            //~ return false;
-    //~ }
-//~
-    //~ // check pixels match
-    //~ for (var idx = 0; idx < imageDataA.data.length; idx += 1) {
-        //~ if (imageDataA.data[idx] !== imageDataB.data[idx]) {
-            //~ console.log('the data does not match at idx: ' + idx);
-            //~ return false;
-        //~ }
-    //~ }
-    //~ console.log('images match!');
-    //~ return true;
-//~ }
-//~
 //~ function encryptionDemo(sjcl) {
     //~ var message = 'This is the secret message',
         //~ password = 'RedRockApple',

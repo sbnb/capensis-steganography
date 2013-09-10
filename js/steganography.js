@@ -142,9 +142,6 @@ capensis.encode.stringToBytes = function (message) {
     }
 }
 
-// TODO: organise code by grouping related functions into nested funcs
-// or better: module pattern to more levels
-
 // one 8 bit byte is stored in 3 pixels, which is 12 elements of data
 // c = changed, x = unchanged, a = alpha (a also unchanged)
 // c,c,c,a,c,c,c,a,c,c,x,a
@@ -165,7 +162,6 @@ capensis.encode.storeByte = function(imageData, threePxBoundary, byte) {
 
 capensis.decode = capensis.decode || {};
 
-// TODO: rename all long methods now that path contains redundant info
 capensis.decode.messageFromImages = function (changed, original) {
     var changedData = capensis.extractImageData(changed),
         originalData = capensis.extractImageData(original);
@@ -264,11 +260,6 @@ Object.getKeyByValue = function(obj, value) {
         }
     }
 }
-
-// TODO: put these functions in a namespace or get rid of them
-
-console.log(capensis);
-
 
 // dev functions, will not remain
 

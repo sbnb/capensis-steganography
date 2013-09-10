@@ -19,7 +19,6 @@ Object.getKeyByValue = function(obj, value) {
 }
 
 //----------------------------------------------------------------------------
-//----------------------------------------------------------------------------
 
 var capensis = capensis || {
     WIDTH: 100,
@@ -40,12 +39,13 @@ capensis.setup.init = function () {
     capensis.buffer.width = capensis.WIDTH;
     capensis.buffer.height = capensis.HEIGHT;
     capensis.bufferCtx = capensis.buffer.getContext('2d');
-    capensis.setup.loadImages(capensis.imagePaths, capensis.setup.addEventHandlers);
+    capensis.setup.loadImages(capensis.setup.addEventHandlers);
 }
 
 // load images, then call callback
-capensis.setup.loadImages = function (imagePaths, callback) {
-    var images = {},
+capensis.setup.loadImages = function (callback) {
+    var imagePaths = capensis.imagePaths,
+        images = {},
         loadedImages = 0,
         numImages = Object.size(imagePaths);
 
@@ -65,20 +65,18 @@ capensis.setup.loadImages = function (imagePaths, callback) {
 // check and notify user if image unsuitable
 capensis.setup.addEventHandlers = function (images) {
     $('.imageDecode').off().on('click', function (e) {
-        var originalImgObj = getImageObjFromHtmlImageSrc(images, e.target.src),
-            changedImgObj = images.encoded;
-
-        var changedImageData = capensis.canvas.getImageDataViaCanvas(changedImgObj, capensis.buffer),
-            originalImageData = capensis.canvas.getImageDataViaCanvas(originalImgObj, capensis.buffer),
-            changes = capensis.decode.getChangesBetweenImageData(changedImageData, originalImageData),
-            message = capensis.decode.extractMessageFromImage(capensis.buffer, changedImgObj, originalImgObj);
+        var changed = images.encoded,
+            original = getImageObjFromHtmlImageSrc(images, e.target.src),
+            message = capensis.decode.messageFromImages(changed, original);
 
         $('#messagePlaceHolder').text(message);
     });
 
     $('.imageEncode').off().on('click', function (e) {
         var image = getImageObjFromHtmlImageSrc(images, e.target.src);
-        capensis.encode.encodeMessageIntoImage($('#message').val(), image);
+            message = $('#message').val();
+
+        capensis.encode.messageIntoImage(message, image);
     });
 
     function getImageObjFromHtmlImageSrc(images, src) {
@@ -89,49 +87,49 @@ capensis.setup.addEventHandlers = function (images) {
 }
 
 //----------------------------------------------------------------------------
-//----------------------------------------------------------------------------
 
-capensis.canvas = capensis.canvas || {};
+// to get image data for a loaded Image object we need to go via a canvas
+capensis.extractImageData = function (image) {
+    var ctx = capensis.buffer.getContext('2d'),
+        width = capensis.buffer.width,
+        height = capensis.buffer.height;
 
-capensis.canvas.getImageDataViaCanvas = function (image, canvas) {
-    var ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    ctx.clearRect(0, 0, width, height);
     ctx.drawImage(image, 0, 0);
-    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    return imageData;
+    return ctx.getImageData(0, 0, width, height);
 }
 
-capensis.canvas.copyCanvasToImagePlaceHolder = function (canvas) {
-    var dataURL = canvas.toDataURL();
-    document.getElementById('imagePlaceHolder').src = dataURL;
-}
-
-//----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
 capensis.encode = capensis.encode || {};
 
-capensis.encode.encodeMessageIntoImage = function (message, image) {
-    var imageData = capensis.canvas.getImageDataViaCanvas(image, capensis.buffer);
+// encode a mesage into an image and add the encoded image to the DOM
+capensis.encode.messageIntoImage = function (message, image) {
+    // get the imageData of the image to be used for encoding
+    var imageData = capensis.extractImageData(image),
+        dataURL;
+
+    // put the message into the imageData
     capensis.encode.encodeMessageInImageData(message, imageData);
 
-    console.log('encodeMessageIntoImage(): first 20 elmts: ',
-            getFirstNElementsOfClampedArray(imageData.data, 20));
-
-
+    // add the now encoded image to the canvas and get its contents as a dataURL
     capensis.bufferCtx.putImageData(imageData, 0, 0);
-    capensis.canvas.copyCanvasToImagePlaceHolder(capensis.buffer);
+    dataURL = capensis.buffer.toDataURL();
+
+    // put the image in the DOM within an img tag (not in a canvas)
+    // this can be saved by the user with right-click
+    document.getElementById('imagePlaceHolder').src = dataURL;
 }
 
 // store the message as a difference to image data
 capensis.encode.encodeMessageInImageData = function (message, imageData) {
-    var bytes = capensis.encode.stringToBytes(message),
+    var storeByte = capensis.encode.storeByte,
+        bytes = capensis.encode.stringToBytes(message),
         byteIdx = 0,
         rgbIdx = 0;
 
     for (byteIdx = 0; byteIdx < bytes.length; byteIdx += 8) {
-        capensis.encode.storeByte(imageData, rgbIdx, bytes.slice(byteIdx, byteIdx + 8));
+        storeByte(imageData, rgbIdx, bytes.slice(byteIdx, byteIdx + 8));
         rgbIdx += 12;
     }
 }
@@ -182,25 +180,25 @@ capensis.encode.storeByte = function(imageData, threePxBoundary, byte) {
 }
 
 //----------------------------------------------------------------------------
-//----------------------------------------------------------------------------
 
 capensis.decode = capensis.decode || {};
 
 // TODO: rename all long methods now that path contains redundant info
-capensis.decode.extractMessageFromImage = function (canvas, changed, original) {
-    var changedImageData = capensis.canvas.getImageDataViaCanvas(changed, canvas),
-        originalImageData = capensis.canvas.getImageDataViaCanvas(original, canvas);
-    return capensis.decode.extractMessageFromImageData(changedImageData, originalImageData);
+capensis.decode.messageFromImages = function (changed, original) {
+    var changedData = capensis.extractImageData(changed),
+        originalData = capensis.extractImageData(original);
+
+    return capensis.decode.messageFromImageData(changedData, originalData);
 }
 
 
-capensis.decode.extractMessageFromImageData = function(changed, original) {
-    var changes = capensis.decode.getChangesBetweenImageData(changed, original);
+capensis.decode.messageFromImageData = function(changed, original) {
+    var changes = capensis.decode.getChangesInImageData(changed, original);
     return capensis.decode.bytesToString(changes);
 }
 
 // return changes between image data as array of bytes
-capensis.decode.getChangesBetweenImageData = function(changed, original) {
+capensis.decode.getChangesInImageData = function(changed, original) {
     var bytes = [],
         originalSlice,
         changedSlice,
@@ -257,19 +255,8 @@ capensis.decode.bytesToString = function (bytes) {
 }
 
 //----------------------------------------------------------------------------
-//----------------------------------------------------------------------------
-
 
 // TODO: put these functions in a namespace or get rid of them
-// utility function, Chrome does not provide slice on Uint8ClampedArray
-function getFirstNElementsOfClampedArray(clamped, n) {
-    var limit = n <= clamped.length ? n : clamped.length,
-        elements = [];
-    for (var idx = 0; idx < limit; idx += 1) {
-        elements.push(clamped[idx]);
-    }
-    return elements;
-}
 
 function assert(condition, message) {
     if (!condition) {
@@ -277,15 +264,14 @@ function assert(condition, message) {
     }
 }
 
-
 console.log(capensis);
 
 
 // dev functions, will not remain
 
 //~ function compareImages(imageA, imageB, canvas) {
-    //~ var imageDataA = getImageDataViaCanvas(imageA, canvas);
-    //~ var imageDataB = getImageDataViaCanvas(imageB, canvas);
+    //~ var imageDataA = extractImageData(imageA);
+    //~ var imageDataB = extractImageData(imageB);
     //~ isImageDataSame(imageDataA, imageDataB);
 //~ }
 //~

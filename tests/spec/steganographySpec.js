@@ -18,7 +18,7 @@ describe('Email Steganography Tests', function() {
         });
 
         it('there are no changes when comparing identical image data', function() {
-            var changes = capensis.decode.getChangesBetweenImageData(fakeImageData,
+            var changes = capensis.decode.getChangesInImageData(fakeImageData,
                     clonedImageData);
             expect(changes.length).toBe(0);
         });
@@ -95,7 +95,7 @@ describe('Email Steganography Tests', function() {
             capensis.encode.storeByte(fakeImageData, 0, [1,1,1,1,1,1,1,1]);
             capensis.encode.storeByte(fakeImageData, 12, [1,1,1,1,1,1,1,1]);
 
-            var changes = capensis.decode.getChangesBetweenImageData(fakeImageData,
+            var changes = capensis.decode.getChangesInImageData(fakeImageData,
                     clonedImageData);
             expect(changes.length).toBe(16);
             expect(changes).toHaveAllValuesInRange(1, 1);
@@ -104,7 +104,7 @@ describe('Email Steganography Tests', function() {
         it('can retrieve expected binary array after inserting message', function() {
             var simple = 'hey';
             capensis.encode.encodeMessageInImageData(simple, fakeImageData);
-            var changes = capensis.decode.getChangesBetweenImageData(fakeImageData,
+            var changes = capensis.decode.getChangesInImageData(fakeImageData,
                     clonedImageData);
 
             expect(changes.length).toBe(24);
@@ -115,9 +115,9 @@ describe('Email Steganography Tests', function() {
 
         it('can retrieve a plain message', function() {
             capensis.encode.encodeMessageInImageData(message, fakeImageData);
-            var changes = capensis.decode.getChangesBetweenImageData(fakeImageData,
+            var changes = capensis.decode.getChangesInImageData(fakeImageData,
                     clonedImageData);
-            var text = capensis.decode.extractMessageFromImageData(fakeImageData,
+            var text = capensis.decode.messageFromImageData(fakeImageData,
                     clonedImageData);
             expect(text).toEqual(message);
         });

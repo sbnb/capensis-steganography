@@ -18,15 +18,10 @@ Object.getKeyByValue = function(obj, value) {
     }
 }
 
-var capensis =  capensis || {
-
-};
-capensis.extract = capensis.extract || {};
-
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
-var myNameSpace = myNameSpace || {
+var capensis = capensis || {
     WIDTH: 100,
     HEIGHT: 100,
     imagePaths: {
@@ -38,18 +33,18 @@ var myNameSpace = myNameSpace || {
     significantBits: [0, 1, 2, 4, 5, 6, 8, 9]
 };
 
-myNameSpace.setup = myNameSpace.setup || {};
+capensis.setup = capensis.setup || {};
 
-myNameSpace.setup.init = function () {
-    myNameSpace.buffer = document.createElement('canvas'),
-    myNameSpace.buffer.width = myNameSpace.WIDTH;
-    myNameSpace.buffer.height = myNameSpace.HEIGHT;
-    myNameSpace.bufferCtx = myNameSpace.buffer.getContext('2d');
-    myNameSpace.setup.loadImages(myNameSpace.imagePaths, myNameSpace.setup.addEventHandlers);
+capensis.setup.init = function () {
+    capensis.buffer = document.createElement('canvas'),
+    capensis.buffer.width = capensis.WIDTH;
+    capensis.buffer.height = capensis.HEIGHT;
+    capensis.bufferCtx = capensis.buffer.getContext('2d');
+    capensis.setup.loadImages(capensis.imagePaths, capensis.setup.addEventHandlers);
 }
 
 // load images, then call callback
-myNameSpace.setup.loadImages = function (imagePaths, callback) {
+capensis.setup.loadImages = function (imagePaths, callback) {
     var images = {},
         loadedImages = 0,
         numImages = Object.size(imagePaths);
@@ -68,27 +63,27 @@ myNameSpace.setup.loadImages = function (imagePaths, callback) {
 
 // TODO: image alpha values must always be opaque (255)
 // check and notify user if image unsuitable
-myNameSpace.setup.addEventHandlers = function (images) {
+capensis.setup.addEventHandlers = function (images) {
     $('.imageDecode').off().on('click', function (e) {
         var originalImgObj = getImageObjFromHtmlImageSrc(images, e.target.src),
             changedImgObj = images.encoded;
 
-        var changedImageData = myNameSpace.canvas.getImageDataViaCanvas(changedImgObj, myNameSpace.buffer),
-            originalImageData = myNameSpace.canvas.getImageDataViaCanvas(originalImgObj, myNameSpace.buffer),
-            changes = myNameSpace.decode.getChangesBetweenImageData(changedImageData, originalImageData),
-            message = myNameSpace.decode.extractMessageFromImage(myNameSpace.buffer, changedImgObj, originalImgObj);
+        var changedImageData = capensis.canvas.getImageDataViaCanvas(changedImgObj, capensis.buffer),
+            originalImageData = capensis.canvas.getImageDataViaCanvas(originalImgObj, capensis.buffer),
+            changes = capensis.decode.getChangesBetweenImageData(changedImageData, originalImageData),
+            message = capensis.decode.extractMessageFromImage(capensis.buffer, changedImgObj, originalImgObj);
 
         $('#messagePlaceHolder').text(message);
     });
 
     $('.imageEncode').off().on('click', function (e) {
         var image = getImageObjFromHtmlImageSrc(images, e.target.src);
-        myNameSpace.encode.encodeMessageIntoImage($('#message').val(), image);
+        capensis.encode.encodeMessageIntoImage($('#message').val(), image);
     });
 
     function getImageObjFromHtmlImageSrc(images, src) {
         var path = 'images/' + src.split('/').pop(),
-            key = Object.getKeyByValue(myNameSpace.imagePaths, path);
+            key = Object.getKeyByValue(capensis.imagePaths, path);
         return images[key];
     }
 }
@@ -96,9 +91,9 @@ myNameSpace.setup.addEventHandlers = function (images) {
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
-myNameSpace.canvas = myNameSpace.canvas || {};
+capensis.canvas = capensis.canvas || {};
 
-myNameSpace.canvas.getImageDataViaCanvas = function (image, canvas) {
+capensis.canvas.getImageDataViaCanvas = function (image, canvas) {
     var ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -107,7 +102,7 @@ myNameSpace.canvas.getImageDataViaCanvas = function (image, canvas) {
     return imageData;
 }
 
-myNameSpace.canvas.copyCanvasToImagePlaceHolder = function (canvas) {
+capensis.canvas.copyCanvasToImagePlaceHolder = function (canvas) {
     var dataURL = canvas.toDataURL();
     document.getElementById('imagePlaceHolder').src = dataURL;
 }
@@ -115,34 +110,34 @@ myNameSpace.canvas.copyCanvasToImagePlaceHolder = function (canvas) {
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
-myNameSpace.encode = myNameSpace.encode || {};
+capensis.encode = capensis.encode || {};
 
-myNameSpace.encode.encodeMessageIntoImage = function (message, image) {
-    var imageData = myNameSpace.canvas.getImageDataViaCanvas(image, myNameSpace.buffer);
-    myNameSpace.encode.encodeMessageInImageData(message, imageData);
+capensis.encode.encodeMessageIntoImage = function (message, image) {
+    var imageData = capensis.canvas.getImageDataViaCanvas(image, capensis.buffer);
+    capensis.encode.encodeMessageInImageData(message, imageData);
 
     console.log('encodeMessageIntoImage(): first 20 elmts: ',
             getFirstNElementsOfClampedArray(imageData.data, 20));
 
 
-    myNameSpace.bufferCtx.putImageData(imageData, 0, 0);
-    myNameSpace.canvas.copyCanvasToImagePlaceHolder(myNameSpace.buffer);
+    capensis.bufferCtx.putImageData(imageData, 0, 0);
+    capensis.canvas.copyCanvasToImagePlaceHolder(capensis.buffer);
 }
 
 // store the message as a difference to image data
-myNameSpace.encode.encodeMessageInImageData = function (message, imageData) {
-    var bytes = myNameSpace.encode.stringToBytes(message),
+capensis.encode.encodeMessageInImageData = function (message, imageData) {
+    var bytes = capensis.encode.stringToBytes(message),
         byteIdx = 0,
         rgbIdx = 0;
 
     for (byteIdx = 0; byteIdx < bytes.length; byteIdx += 8) {
-        myNameSpace.encode.storeByte(imageData, rgbIdx, bytes.slice(byteIdx, byteIdx + 8));
+        capensis.encode.storeByte(imageData, rgbIdx, bytes.slice(byteIdx, byteIdx + 8));
         rgbIdx += 12;
     }
 }
 
 // turn string into array of 8 bit bytes
-myNameSpace.encode.stringToBytes = function (message) {
+capensis.encode.stringToBytes = function (message) {
     var charCode,
         bytes = [];
 
@@ -173,8 +168,8 @@ myNameSpace.encode.stringToBytes = function (message) {
 // one 8 bit byte is stored in 3 pixels, which is 12 elements of data
 // c = changed, x = unchanged, a = alpha (a also unchanged)
 // c,c,c,a,c,c,c,a,c,c,x,a
-myNameSpace.encode.storeByte = function(imageData, threePxBoundary, byte) {
-    var significantBits = myNameSpace.significantBits;
+capensis.encode.storeByte = function(imageData, threePxBoundary, byte) {
+    var significantBits = capensis.significantBits;
     for (var idx = 0; idx < significantBits.length; idx += 1) {
         storeBit(imageData, threePxBoundary + significantBits[idx], byte[idx]);
     }
@@ -189,23 +184,23 @@ myNameSpace.encode.storeByte = function(imageData, threePxBoundary, byte) {
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
-myNameSpace.decode = myNameSpace.decode || {};
+capensis.decode = capensis.decode || {};
 
 // TODO: rename all long methods now that path contains redundant info
-myNameSpace.decode.extractMessageFromImage = function (canvas, changed, original) {
-    var changedImageData = myNameSpace.canvas.getImageDataViaCanvas(changed, canvas),
-        originalImageData = myNameSpace.canvas.getImageDataViaCanvas(original, canvas);
-    return myNameSpace.decode.extractMessageFromImageData(changedImageData, originalImageData);
+capensis.decode.extractMessageFromImage = function (canvas, changed, original) {
+    var changedImageData = capensis.canvas.getImageDataViaCanvas(changed, canvas),
+        originalImageData = capensis.canvas.getImageDataViaCanvas(original, canvas);
+    return capensis.decode.extractMessageFromImageData(changedImageData, originalImageData);
 }
 
 
-myNameSpace.decode.extractMessageFromImageData = function(changed, original) {
-    var changes = myNameSpace.decode.getChangesBetweenImageData(changed, original);
-    return myNameSpace.decode.bytesToString(changes);
+capensis.decode.extractMessageFromImageData = function(changed, original) {
+    var changes = capensis.decode.getChangesBetweenImageData(changed, original);
+    return capensis.decode.bytesToString(changes);
 }
 
 // return changes between image data as array of bytes
-myNameSpace.decode.getChangesBetweenImageData = function(changed, original) {
+capensis.decode.getChangesBetweenImageData = function(changed, original) {
     var bytes = [],
         originalSlice,
         changedSlice,
@@ -227,7 +222,7 @@ myNameSpace.decode.getChangesBetweenImageData = function(changed, original) {
     // read 8 significant bits starting at boundaryIdx
     function readSliceAt(rgbData, boundaryIdx) {
         var bits = [],
-            significantBits = myNameSpace.significantBits;
+            significantBits = capensis.significantBits;
         for (var sigBit = 0; sigBit < significantBits.length; sigBit += 1) {
             bits.push(rgbData[boundaryIdx + significantBits[sigBit]]);
         }
@@ -245,7 +240,7 @@ myNameSpace.decode.getChangesBetweenImageData = function(changed, original) {
 }
 
 // parse array of 8 bit bytes to string
-myNameSpace.decode.bytesToString = function (bytes) {
+capensis.decode.bytesToString = function (bytes) {
     var message = '';
     for (var idx = 0; idx < bytes.length; idx += 8) {
         message += byteToChar(bytes.slice(idx, idx + 8));
@@ -283,7 +278,7 @@ function assert(condition, message) {
 }
 
 
-console.log(myNameSpace);
+console.log(capensis);
 
 
 // dev functions, will not remain

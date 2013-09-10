@@ -5,7 +5,7 @@ describe('Email Steganography Tests', function() {
         message;
 
     beforeEach(function() {
-        myNameSpace.setup.init();
+        capensis.setup.init();
         fakeImageData = createImageData(100, 100, 150);
         clonedImageData = JSON.parse(JSON.stringify(fakeImageData));
         message = 'this is the secret message';
@@ -18,7 +18,7 @@ describe('Email Steganography Tests', function() {
         });
 
         it('there are no changes when comparing identical image data', function() {
-            var changes = myNameSpace.decode.getChangesBetweenImageData(fakeImageData,
+            var changes = capensis.decode.getChangesBetweenImageData(fakeImageData,
                     clonedImageData);
             expect(changes.length).toBe(0);
         });
@@ -33,19 +33,19 @@ describe('Email Steganography Tests', function() {
     describe('Inserting messages', function() {
 
         it('alters the image data when inserting a message', function() {
-            myNameSpace.encode.encodeMessageInImageData(message, fakeImageData);
+            capensis.encode.encodeMessageInImageData(message, fakeImageData);
             expect(fakeImageData.data).not.toEqual(clonedImageData.data);
         });
 
         it('alters the image data when inserting minimal message "a"', function() {
             var imageData = createImageData(2, 1, 254);
-            myNameSpace.encode.encodeMessageInImageData('a', imageData);
+            capensis.encode.encodeMessageInImageData('a', imageData);
             expect(imageData.data).not.toEqual(clonedImageData.data);
         });
 
         it('can convert a message to an array of 8 bit bytes', function() {
             var simple = 'hey',
-                bytes = myNameSpace.encode.stringToBytes(simple);
+                bytes = capensis.encode.stringToBytes(simple);
             expect(bytes.length).toBe(24);
             expect(bytes).toEqual([
                 0,1,1,0,1,0,0,0,
@@ -54,7 +54,7 @@ describe('Email Steganography Tests', function() {
         });
 
         it('does not change the alpha channel on insertion', function() {
-            myNameSpace.encode.encodeMessageInImageData(message, fakeImageData);
+            capensis.encode.encodeMessageInImageData(message, fakeImageData);
             var alphaChannel = getAlphaChannel(fakeImageData.data);
             expect(alphaChannel).toHaveAllValuesInRange(255, 255);
         });
@@ -62,7 +62,7 @@ describe('Email Steganography Tests', function() {
 
         it('handles rgba values of 0 edge case', function() {
             var imageData = createImageData(3, 1, 0);
-            myNameSpace.encode.encodeMessageInImageData('a', imageData);
+            capensis.encode.encodeMessageInImageData('a', imageData);
             expect(imageData.data).toEqual([
                 0, 1, 1, 255,
                 0, 0, 0, 255,
@@ -71,7 +71,7 @@ describe('Email Steganography Tests', function() {
 
         it('handles rgba values of 254 edge case', function() {
             var imageData = createImageData(3, 1, 254);
-            myNameSpace.encode.encodeMessageInImageData('a', imageData);
+            capensis.encode.encodeMessageInImageData('a', imageData);
             expect(imageData.data).toEqual([
                 254, 255, 255, 255,
                 254, 254, 254, 255,
@@ -80,7 +80,7 @@ describe('Email Steganography Tests', function() {
 
         it('handles rgba values of 255 edge case', function() {
             var imageData = createImageData(3, 1, 255);
-            myNameSpace.encode.encodeMessageInImageData('a', imageData);
+            capensis.encode.encodeMessageInImageData('a', imageData);
             expect(imageData.data).toEqual([
                 255, 254, 254, 255,
                 255, 255, 255, 255,
@@ -92,10 +92,10 @@ describe('Email Steganography Tests', function() {
     describe('Extracting messages', function() {
 
         it('can extract changes in image data after alteration', function() {
-            myNameSpace.encode.storeByte(fakeImageData, 0, [1,1,1,1,1,1,1,1]);
-            myNameSpace.encode.storeByte(fakeImageData, 12, [1,1,1,1,1,1,1,1]);
+            capensis.encode.storeByte(fakeImageData, 0, [1,1,1,1,1,1,1,1]);
+            capensis.encode.storeByte(fakeImageData, 12, [1,1,1,1,1,1,1,1]);
 
-            var changes = myNameSpace.decode.getChangesBetweenImageData(fakeImageData,
+            var changes = capensis.decode.getChangesBetweenImageData(fakeImageData,
                     clonedImageData);
             expect(changes.length).toBe(16);
             expect(changes).toHaveAllValuesInRange(1, 1);
@@ -103,8 +103,8 @@ describe('Email Steganography Tests', function() {
 
         it('can retrieve expected binary array after inserting message', function() {
             var simple = 'hey';
-            myNameSpace.encode.encodeMessageInImageData(simple, fakeImageData);
-            var changes = myNameSpace.decode.getChangesBetweenImageData(fakeImageData,
+            capensis.encode.encodeMessageInImageData(simple, fakeImageData);
+            var changes = capensis.decode.getChangesBetweenImageData(fakeImageData,
                     clonedImageData);
 
             expect(changes.length).toBe(24);
@@ -114,10 +114,10 @@ describe('Email Steganography Tests', function() {
         });
 
         it('can retrieve a plain message', function() {
-            myNameSpace.encode.encodeMessageInImageData(message, fakeImageData);
-            var changes = myNameSpace.decode.getChangesBetweenImageData(fakeImageData,
+            capensis.encode.encodeMessageInImageData(message, fakeImageData);
+            var changes = capensis.decode.getChangesBetweenImageData(fakeImageData,
                     clonedImageData);
-            var text = myNameSpace.decode.extractMessageFromImageData(fakeImageData,
+            var text = capensis.decode.extractMessageFromImageData(fakeImageData,
                     clonedImageData);
             expect(text).toEqual(message);
         });

@@ -1,8 +1,48 @@
-.imgEncode img, .imgDecode img {
-  border: 3px solid #CCC;
-  margin-right: 10px;
+body {
+  font-size: 16px;
+  xcolor: #000;
 }
 
-#messagePlaceHolder {
-  font-weight: bold;
+.strapline {
+  margin: -15px 0 -15px 0px;
+  font-style: oblique;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Molengo', Georgia, Times, serif;
+}
+
+h1 {
+  xbackground-color: #CCC;
+}
+
+p, textarea {
+    font-family: 'Lekton', Helvetica, Arial, sans-serif;
+    color: #000;
+}
+
+p#messagePlaceHolder {
+  font-size: 18px;
+}
+
+.library img {
+  width: 130px;
+}
+
+.library img:hover {
+  border-color: #777;
+  background-color: #DDF;
+}
+
+#encodedImage, #imagePlaceHolder {
+  xwidth: 250px;
+  height: 270px;
+}
+
+#encodedModal {
+	width: 340px;
+}
+
+.spacer {
+  margin-top: 40px;
 }

@@ -2,30 +2,91 @@
 <html>
   <head>
     <title>Decode a message from an image</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="http://fonts.googleapis.com/css?family=Lekton" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Molengo" rel="stylesheet" type="text/css">
+    <link href="lib/bootstrap-2.3.2/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link rel='stylesheet' type='text/css' media='screen' href='css/main.css'>
+
   </head>
 
   <body>
-    <h1>Decode a secret message</h1>
+    <div class='container'>
 
-    <img src='images/encoded.png' id='encodedImage'>
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li class="active"><a href="decode.html">Decode</a></li>
+          <li><a href="encode.html">Encode</a></li>
+        </ul>
+        <h3 class="muted">Capensis Image Steganography</h3>
+        <h5 class="muted strapline">For people who don't like peepers</h5>
+      </div>
 
-    <p>Choose matching image:</p>
-    <a href='#' class='imageDecode'><img src='images/red.png'></a>
-    <a href='#' class='imageDecode'><img src='images/blue.png'></a>
-    <a href='#' class='imageDecode'><img src='images/striped.png'></a>
+      <hr>
 
-    <p>Decoded message:</p>
-    <p id='messagePlaceHolder'></p>
+<!--
+      <h1>Decoding</h1>
+-->
 
-    <div>
-      <a href='encode.html'>Encode a message</a>
+      <div class='row'>
+        <div class='span4'>
+          <h3>Encoded image</h3>
+          <div class='row'>
+            <div class='span4'>
+              <img class='img-polaroid' src='images/encoded.png' id='encodedImage'>
+            </div>
+          </div>
+        </div>
+
+        <div class='span8 library'>
+
+          <h3>Choose matching image to decode</h3>
+          <a href='#' class='imageDecode'><img class='img-polaroid' src='images/image01.png'></a>
+          <a href='#' class='imageDecode'><img class='img-polaroid' src='images/image02.png'></a>
+          <a href='#' class='imageDecode'><img class='img-polaroid' src='images/image03.png'></a>
+          <a href='#' class='imageDecode'><img class='img-polaroid' src='images/image04.png'></a>
+
+          <a href='#' class='imageDecode'><img class='img-polaroid' src='images/image05.png'></a>
+          <a href='#' class='imageDecode'><img class='img-polaroid' src='images/image06.png'></a>
+          <a href='#' class='imageDecode'><img class='img-polaroid' src='images/image07.png'></a>
+          <a href='#' class='imageDecode'><img class='img-polaroid' src='images/image08.png'></a>
+
+        </div>
+
+      </div>
+
+      <div class='row spacer'>
+        <div class='span4'>
+          <p>The encoded image is images/encoded.png. Save incoming encoded images over that file.</p>
+        </div>
+        <div class='span8'>
+          <p>Library images are a shared set of un-encoded images. Choose
+          the one that matches the incoming encoded image.</p>
+        </div>
+      </div>
+
+      <div id="decodedModal" class="modal hide fade">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h3>Here is the decoded message</h3>
+        </div>
+
+        <div class="modal-body">
+          <pre><p id='messagePlaceHolder'></p></pre>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        </div>
+      </div>
+
     </div>
 
     <script type='text/javascript' src='lib/jquery-1.7.1.min.js'></script>
     <script type='text/javascript' src='lib/lodash-1.3.1.min.js'></script>
     <script type='text/javascript' src='lib/sjcl.js'></script>
     <script type="text/javascript" src="js/steganography.js"></script>
+    <script src="lib/bootstrap-2.3.2/js/bootstrap.min.js"></script>
     <script type='text/javascript' >
       $(document).ready(function () {
           capensis.setup.init();

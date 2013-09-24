@@ -53,6 +53,7 @@ capensis.setup.addEventHandlers = function (images) {
             message = capensis.decode.messageFromImages(changed, original);
 
         $('#messagePlaceHolder').text(message);
+        $('#decodedModal').modal();
     });
 
     $('.imageEncode').off().on('click', function (e) {
@@ -60,6 +61,7 @@ capensis.setup.addEventHandlers = function (images) {
             message = $('#message').val();
 
         capensis.encode.messageIntoImage(message, image);
+        $('#encodedModal').modal();
     });
 
     function getImageObjFromHtmlImageSrc(images, src) {

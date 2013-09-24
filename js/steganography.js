@@ -1,13 +1,15 @@
-
-//----------------------------------------------------------------------------
-
 var capensis = capensis || {
-    WIDTH: 100,
-    HEIGHT: 100,
+    WIDTH: 250,
+    HEIGHT: 250,
     imagePaths: {
-        red: 'images/red.png',
-        blue: 'images/blue.png',
-        striped: 'images/striped.png',
+        image01: 'images/image01.png',
+        image02: 'images/image02.png',
+        image03: 'images/image03.png',
+        image04: 'images/image04.png',
+        image05: 'images/image05.png',
+        image06: 'images/image06.png',
+        image07: 'images/image07.png',
+        image08: 'images/image08.png',
         encoded: 'images/encoded.png'
     },
     significantBits: [0, 1, 2, 4, 5, 6, 8, 9]

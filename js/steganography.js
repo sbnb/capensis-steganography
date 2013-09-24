@@ -184,10 +184,13 @@ capensis.decode.getChangesInImageData = function(changed, original) {
     var bytes = [],
         originalSlice,
         changedSlice,
-        byte;
+        byte,
+        MAX_MSG_LEN = 2000 * 3; // char len * 3 pixels per char
+
+    var limit = Math.min(original.data.length - 12, MAX_MSG_LEN);
 
     // read three pixels of data at a time (12 elements)
-    for (var idx = 0; idx < original.data.length - 12; idx += 12) {
+    for (var idx = 0; idx < limit; idx += 12) {
         originalSlice = readSliceAt(original.data, idx);
         changedSlice = readSliceAt(changed.data, idx);
 

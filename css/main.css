@@ -1,3 +1,17 @@
+@font-face {
+  font-family: 'Molengo';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Molengo'), local('Molengo-Regular'),url(../fonts/Molengo/Molengo-Regular.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Lekton';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Lekton'), local('Lekton-Regular'), url(../fonts/Lekton/Lekton-Regular.ttf) format('truetype');
+}
+
 body {
   font-size: 16px;
   xcolor: #000;
@@ -10,6 +24,7 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Molengo', Georgia, Times, serif;
+    font-weight: 400;
 }
 
 h1 {
@@ -40,7 +55,7 @@ p#messagePlaceHolder {
 }
 
 #encodedModal {
-	width: 340px;
+  width: 340px;
 }
 
 .spacer {

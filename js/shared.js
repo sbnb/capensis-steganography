@@ -79,7 +79,6 @@ capensis.extractImageData = function (image) {
         width = capensis.buffer.width,
         height = capensis.buffer.height;
 
-    ctx.clearRect(0, 0, width, height);
     ctx.drawImage(image, 0, 0);
     return ctx.getImageData(0, 0, width, height);
 }

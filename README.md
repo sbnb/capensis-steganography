@@ -11,15 +11,15 @@ Both users install this program locally on their computers. They then exchange a
 
 Once they have a common shared library user A opens the encode page. She enters a message, then selects an image from the library. She saves the resulting encoded image to file, then sends it to user B via email.
 
-User B gets the email, saves the image as ~/images/encded.png, and opens the program. After selecting Decode B then sees the encoded image on the left. By selecting the matching image on the right, from the shared library, the message is decoded and displayed.
+User B gets the email, saves the image as ~/images/encoded.png, and opens the program. After selecting Decode B then sees the encoded image on the left. By selecting the matching image on the right, from the shared library, the message is decoded and displayed.
 
 How it works
 ============
 
-The program converts the messages into binary arrays of eight bit bites, then inserts those as differences with the image. It uses the canvas to get hold of the images as arrays of color data.
+The program converts the messages into binary arrays of eight bit bytes, then inserts those as differences with the image. It uses the canvas to get hold of the images as arrays of color data.
 
 The difference between an encoded and the source library image is very slight -- some of the rgb color values will be changed by 1 decimal value. This will not produce any perceptible difference to human eyes.
 
-Automated detection (by a third party interceptor) is likely impossible provied the third party has no access to the original image. This would include finding the same image on the internet, using a reverse image search.
+Automated detection (by a third party interceptor) is likely impossible provided the third party has no access to the original image. This would include finding the same image on the internet, using a reverse image search.
 
-Hence the need for a safe and unique shared library, ideally exchange between A and B in person, not over the net.
+Hence the need for a safe and unique shared library, ideally exchanged between A and B in person, not over the net.
